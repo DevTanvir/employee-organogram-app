@@ -73,6 +73,7 @@ describe('EmployeeController (e2e)', () => {
   });
 
   afterAll(async () => {
+    await app.close();
     await closeDBAfterTest();
   });
 });
