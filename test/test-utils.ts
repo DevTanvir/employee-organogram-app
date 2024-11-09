@@ -87,6 +87,42 @@ export const seedAdminUser = async (
   return { adminUser, authTokenForAdmin };
 };
 
+export const seedUser = async (
+  app: INestApplication,
+): Promise<{ user: UserOutput; authTokenForUser: AuthTokenOutput }> => {
+  const defaultUser: CreateUserInput = {
+    name: 'Default User',
+    username: 'default-username',
+    password: 'default-password',
+    roles: [ROLE.USER],
+    isAccountDisabled: false,
+    email: 'user@example.com',
+  };
+
+  const ctx = new RequestContext();
+
+  // Creating User
+  const userService = app.get(UserService);
+  const userOutput = await userService.createUser(ctx, defaultUser);
+
+  const loginInput: LoginInput = {
+    username: defaultUser.username,
+    password: defaultUser.password,
+  };
+
+  // Logging in Admin User to get AuthToken
+  const loginResponse = await request(app.getHttpServer())
+    .post('/auth/login')
+    .send(loginInput)
+    .expect(HttpStatus.OK);
+
+  const authTokenForUser: AuthTokenOutput = loginResponse.body.data;
+
+  const user: UserOutput = JSON.parse(JSON.stringify(userOutput));
+
+  return { user, authTokenForUser };
+};
+
 export const closeDBAfterTest = async (): Promise<void> => {
   console.log(`Closing connection to ${TEST_DB_NAME} database`);
   const connection = await getConnection(TEST_DB_CONNECTION_NAME);

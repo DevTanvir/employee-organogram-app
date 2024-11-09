@@ -19,7 +19,6 @@ export class EmployeeRepository extends TreeRepository<Employee> {
   }
   async getDirectReportsByEmployee(employee: Employee): Promise<Employee[]> {
     const directReports = await this.findDescendantsTree(employee);
-
     return [directReports];
   }
 }
